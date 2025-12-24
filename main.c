@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <ncurses.h>
 
 struct calendar {
     int year;
@@ -73,13 +74,27 @@ int main() {
 
     fill_calendar(c, calendar);
 
-    for (int row = 0; row < 6; row++) {
-        for (int col = 0; col < 7; col++) {
-            printf("%d ", calendar[row][col]);
-        }
+    printf("\n");
+    
+    initscr();
+    cbreak();
+    noecho();
 
-        printf("\n");
-    }
+    int input;
+
+    do {
+        clear();
+
+        for (int row = 0; row < 6; row++) {
+            for (int col = 0; col < 7; col++) {
+                printw("%d ", calendar[row][col]);
+            }
+
+            printw("\n");
+        }
+    } while ((input = getch()) != 'q');
+
+    endwin();
 
     return 0;
 }
