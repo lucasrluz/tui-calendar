@@ -25,9 +25,7 @@ int days_in_month(int month, int year) {
     return 30;
 }
 
-void fill_calendar(struct calendar c) {
-    int calendar[6][7] = {0};
-
+void fill_calendar(struct calendar c, int calendar[6][7]) {
     int days_count = 1;
 
     for (int row = 0; row < 6; row++) {
@@ -39,14 +37,6 @@ void fill_calendar(struct calendar c) {
 
             days_count += 1;
         }
-    }
-
-    for (int row = 0; row < 6; row++) {
-        for (int col = 0; col < 7; col++) {
-            printf("%d ", calendar[row][col]);
-        }
-
-        printf("\n");
     }
 }
 
@@ -79,7 +69,17 @@ int main() {
         .first_day_weekday = w_day.tm_wday
     };
 
-    fill_calendar(c);
+    int calendar[6][7] = {0};
+
+    fill_calendar(c, calendar);
+
+    for (int row = 0; row < 6; row++) {
+        for (int col = 0; col < 7; col++) {
+            printf("%d ", calendar[row][col]);
+        }
+
+        printf("\n");
+    }
 
     return 0;
 }
