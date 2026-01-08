@@ -31,8 +31,14 @@ void fill_calendar(struct calendar c, int calendar[6][7]) {
 
     for (int row = 0; row < 6; row++) {
         for (int col = 0; col < 7; col++) {
-            if (days_count > c.month_total_days) continue;
-            if (col < c.first_day_weekday && row == 0) continue;
+            if (days_count > c.month_total_days) {
+                calendar[row][col] = 0;
+                continue;
+            }
+            if (col < c.first_day_weekday && row == 0) {
+                calendar[row][col] = 0;
+                continue;
+            }
 
             calendar[row][col] = days_count;
 
@@ -41,40 +47,52 @@ void fill_calendar(struct calendar c, int calendar[6][7]) {
     }
 }
 
+void make_time(int day, int month, int year, struct calendar *c) {
+    // day, month e year iguais a 0 significa data atual.
+    if (day == 0 && month == 0 && year == 0) {
+        time_t now = time(NULL);
+        struct tm *s_now = localtime(&now);
+
+        struct tm w_day = {0};
+
+        w_day.tm_mday = 1;
+        w_day.tm_mon = s_now->tm_mon;
+        w_day.tm_year = s_now->tm_year;
+
+        mktime(&w_day);
+
+        c->year = s_now->tm_year + 1900;
+        c->month = s_now->tm_mon + 1;
+        c->month_total_days = days_in_month(s_now->tm_mon + 1, s_now->tm_year + 1900);
+        c->current_month_day = s_now->tm_mday;
+        c->first_day_weekday = w_day.tm_wday;
+
+        return;
+    }
+
+    struct tm date = {0};
+
+    date.tm_mday = day;
+    date.tm_mon = month;
+    date.tm_year = year;
+
+    mktime(&date);
+
+    c->year = date.tm_year + 1900;
+    c->month = date.tm_mon + 1;
+    c->month_total_days = days_in_month(date.tm_mon + 1, date.tm_year + 1900);
+    c->current_month_day = date.tm_mday;
+    c->first_day_weekday = date.tm_wday;
+}
+
 int main() {
-    time_t now = time(NULL);
-    struct tm *s_now = localtime(&now);
+    struct calendar c = {0};
 
-    printf("Dia da semana atual: %d\n", s_now->tm_wday);
-    printf("Dia atual: %d\n", s_now->tm_mday);
-    printf("Mês atual: %d\n", s_now->tm_mon + 1);
-    printf("Ano atual: %d\n", s_now->tm_year + 1900);
-
-    printf("Total de dias do mês: %d\n", days_in_month(s_now->tm_mon + 1, s_now->tm_year + 1900));
-
-    struct tm w_day = {0};
-
-    w_day.tm_mday = 1;
-    w_day.tm_mon = s_now->tm_mon;
-    w_day.tm_year = s_now->tm_year;
-
-    mktime(&w_day);
-    
-    printf("Dia da semana para o primeiro dia do mês: %d\n", w_day.tm_wday);
-
-    struct calendar c = {
-        .year = s_now->tm_year + 1900,
-        .month = s_now->tm_mon + 1,
-        .month_total_days = days_in_month(s_now->tm_mon + 1, s_now->tm_year + 1900),
-        .current_month_day = s_now->tm_mday,
-        .first_day_weekday = w_day.tm_wday
-    };
+    make_time(0, 0, 0, &c);
 
     int calendar[6][7] = {0};
 
     fill_calendar(c, calendar);
-
-    printf("\n");
     
     initscr();
     cbreak();
@@ -82,8 +100,15 @@ int main() {
 
     int input;
 
+    int day_count = c.current_month_day;
+    int month_count = c.month;
+    int year_count = c.year;
+
     do {
         clear();
+
+        make_time(day_count, month_count, year_count, &c);
+        fill_calendar(c, calendar);
 
         for (int row = 0; row < 6; row++) {
             for (int col = 0; col < 7; col++) {
